@@ -1,0 +1,19 @@
+#!/bin/bash
+#based on https://github.com/fgrehm/docker-netbeans
+VERSION=8.0.1
+DISPLAY=:0
+TOOL=netbeans
+echo "Starting $TOOL:$VERSION on display $DISPLAY"
+docker pull colinas/netbeans:v$VERSION
+containerDir=`pwd`
+containerId=`docker create -e DISPLAY=$DISPLAY   -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v $containerDir/.netbeans-docker:/home/developer/.netbeans  -v $containerDir:/workspace fgrehm/netbeans:v$VERSION`
+containerHostname=`docker inspect --format='{{ .Config.Hostname }}' $containerId`
+echo "  containerId : $containerId"`docker logs $containerId`
+echo "  containerHostname $containerHostname"
+echo "   - XHOST: "`xhost +local:$containerHostname`
+echo "Starting Container $containerId : "`docker start -i $containerId`
+echo "Container $containerId stopped/exited: "`docker logs $containerId`
+echo "Cleanup: "
+#echo "   - XHOST: "`xhost -local:$containerHostname`
+#http://wiki.ros.org/docker/Tutorials/GUI
+echo "Done."
